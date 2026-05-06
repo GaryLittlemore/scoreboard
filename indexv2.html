@@ -136,14 +136,14 @@ button:active { background: #0f5ec7; }
     <button onclick="removeGoal('home')">Home -1</button>
     <button onclick="removeGoal('away')">Away -1</button>
 
-    <button onclick="addEvent('home','🟨')">🟨</button>
-    <button onclick="addEvent('away','🟨')">🟨</button>
+    <button onclick="addEvent('home','YC')">YC</button>
+    <button onclick="addEvent('away','YC')">YC</button>
 
-    <button onclick="addEvent('home','🟥')">🟥</button>
-    <button onclick="addEvent('away','🟥')">🟥</button>
+    <button onclick="addEvent('home','RC')">RC</button>
+    <button onclick="addEvent('away','RC')">RC</button>
 
-    <button onclick="addEvent('home','🔁')">🔁</button>
-    <button onclick="addEvent('away','🔁')">🔁</button>
+    <button onclick="addEvent('home','Sub')">Sub</button>
+    <button onclick="addEvent('away','Sub')">Sub</button>
 </div>
 
 <div class="timer" id="timer">00:00</div>
@@ -170,7 +170,7 @@ button:active { background: #0f5ec7; }
 </div>
 
 <div class="log">
-    <h3>Match Events</h3>
+    <h3>Match Events Log</h3>
     <div id="log"></div>
 </div>
 
@@ -305,7 +305,7 @@ function exportPDF(){
     doc.line(20,72,w-20,72);
 
     doc.setFontSize(14);
-    doc.text("MATCH EVENTS",20,85);
+    doc.text("Match Events Log",20,85);
 
     let y=95;
     document.querySelectorAll(".log-entry").forEach(e=>{
