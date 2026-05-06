@@ -99,7 +99,6 @@ button:active { background: #0f5ec7; }
     margin: 5px 0;
 }
 
-/* Hide mode */
 .hidden {
     display: none !important;
 }
@@ -120,11 +119,6 @@ button:active { background: #0f5ec7; }
 <h1>⚽ Scoreboard</h1>
 
 <div class="half" id="halfDisplay">1st Half</div>
-
-<!-- ✅ TOGGLE BUTTON -->
-<div style="margin-bottom:10px;">
-    <button onclick="toggleControls()" id="toggleBtn">Hide Controls</button>
-</div>
 
 <div class="teams">
     <div class="team">
@@ -156,6 +150,11 @@ button:active { background: #0f5ec7; }
 
 <div class="timer" id="timer">00:00</div>
 
+<!-- ✅ MOVED TO HERE -->
+<div style="margin-bottom:10px;">
+    <button onclick="toggleControls()" id="toggleBtn">Hide Controls</button>
+</div>
+
 <div class="controls" id="controlsPanel">
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
@@ -186,7 +185,6 @@ let currentHalf = 1;
 
 let controlsHidden = false;
 
-/* ✅ TOGGLE FUNCTION */
 function toggleControls() {
     controlsHidden = !controlsHidden;
 
@@ -199,7 +197,6 @@ function toggleControls() {
         controlsHidden ? "Show Controls" : "Hide Controls";
 }
 
-/* TIMER */
 function formatTime(sec) {
     let minutes = Math.floor(sec / 60);
     let secs = sec % 60;
