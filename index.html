@@ -180,7 +180,7 @@ button:active { background: #0f5ec7; }
 let homeScore = 0, awayScore = 0;
 let startTime = null, elapsed = 0, timerInterval = null, currentHalf = 1;
 
-/* ✅ FIXED ELEMENT REFERENCES */
+/* ELEMENT REFERENCES */
 const homeScoreEl = document.getElementById('homeScore');
 const awayScoreEl = document.getElementById('awayScore');
 const timerEl = document.getElementById('timer');
@@ -315,7 +315,31 @@ function exportPDF(){
         y+=lines.length*6+2;
     });
 
-    doc.save(`${home}_vs_${away}.pdf`);
+    /* ✅ FOOTER WITH PAGE NUMBERS */
+    let pageCount = doc.getNumberOfPages();
+
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+
+        // Center copyright
+        doc.text(
+            "© Gary Littlemore",
+            w / 2,
+            290,
+            { align: "center" }
+        );
+
+        // Right aligned page numbers
+        doc.text(
+            `Page ${i} of ${pageCount}`,
+            w - 20,
+            290,
+            { align: "right" }
+        );
+    }
+
+    doc.save(`${home} vs ${away}.pdf`);
 }
 </script>
 
