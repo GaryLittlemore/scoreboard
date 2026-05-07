@@ -21,9 +21,7 @@ body {
     margin: auto;
 }
 
-h1 {
-    font-size: 24px;
-}
+h1 { font-size: 24px; }
 
 .teams {
     display: flex;
@@ -66,9 +64,7 @@ button {
     color: white;
 }
 
-button:active {
-    background: #0f5ec7;
-}
+button:active { background: #0f5ec7; }
 
 .timer {
     font-size: 48px;
@@ -86,9 +82,7 @@ button:active {
     gap: 10px;
 }
 
-.controls button {
-    width: 100%;
-}
+.controls button { width: 100%; }
 
 .log {
     margin-top: 20px;
@@ -100,32 +94,20 @@ button:active {
     overflow-y: auto;
 }
 
-.log h3 {
-    margin-top: 0;
-}
-
 .log-entry {
     font-size: 16px;
     margin: 5px 0;
 }
 
-/* Desktop layout */
+.hidden {
+    display: none !important;
+}
+
 @media(min-width: 600px) {
-    .teams {
-        flex-direction: row;
-    }
-
-    .team {
-        width: 48%;
-    }
-
-    button {
-        width: auto;
-    }
-
-    .controls button {
-        width: auto;
-    }
+    .teams { flex-direction: row; }
+    .team { width: 48%; }
+    button { width: auto; }
+    .controls button { width: auto; }
 }
 </style>
 </head>
@@ -150,7 +132,7 @@ button:active {
     </div>
 </div>
 
-<div class="buttons">
+<div class="buttons" id="buttonPanel">
     <button onclick="addGoal('home')">Home Goal</button>
     <button onclick="addGoal('away')">Away Goal</button>
     <button onclick="removeGoal('home')">Home -1</button>
@@ -168,19 +150,24 @@ button:active {
 
 <div class="timer" id="timer">00:00</div>
 
-<div class="controls">
+<!-- ✅ MOVED TO HERE -->
+<div style="margin-bottom:10px;">
+    <button onclick="toggleControls()" id="toggleBtn">Hide Controls</button>
+</div>
+
+<div class="controls" id="controlsPanel">
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
     <button onclick="resetMatch()">Reset</button>
     <button onclick="startSecondHalf()">2nd Half</button>
 </div>
 
-<div style="margin-top: 10px;">
+<div id="eventPanel" style="margin-top: 10px;">
     <input id="customEvent" placeholder="Enter match event..." style="width: 65%;">
     <button onclick="addCustomEvent()" style="width: 30%;">Add</button>
 </div>
 
-<div class="log">
+<div class="log" id="logPanel">
     <h3>Match Events Log</h3>
     <div id="log"></div>
 </div>
@@ -196,46 +183,40 @@ let elapsed = 0;
 let timerInterval = null;
 let currentHalf = 1;
 
-/* ✅ FIXED TIMER */
+let controlsHidden = false;
+
+function toggleControls() {
+    controlsHidden = !controlsHidden;
+
+    document.getElementById('buttonPanel').classList.toggle('hidden');
+    document.getElementById('controlsPanel').classList.toggle('hidden');
+    document.getElementById('eventPanel').classList.toggle('hidden');
+    document.getElementById('logPanel').classList.toggle('hidden');
+
+    document.getElementById('toggleBtn').innerText =
+        controlsHidden ? "Show Controls" : "Hide Controls";
+}
+
 function formatTime(sec) {
     let minutes = Math.floor(sec / 60);
     let secs = sec % 60;
 
     if (currentHalf === 1) {
-        if (minutes < 45) {
-            return String(minutes).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
-        }
-
-        if (sec === 45 * 60) {
-            return "45:00";
-        }
-
-        let added = Math.floor((sec - 45 * 60) / 60) + 1;
-        return "45:00 +" + added;
+        if (minutes < 45) return String(minutes).padStart(2,'0') + ":" + String(secs).padStart(2,'0');
+        if (sec === 2700) return "45:00";
+        return "45:00 +" + (Math.floor((sec-2700)/60)+1);
     }
 
     if (currentHalf === 2) {
-        if (minutes < 90) {
-            return String(minutes).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
-        }
-
-        if (sec === 90 * 60) {
-            return "90:00";
-        }
-
-        let added = Math.floor((sec - 90 * 60) / 60) + 1;
-        return "90:00 +" + added;
+        if (minutes < 90) return String(minutes).padStart(2,'0') + ":" + String(secs).padStart(2,'0');
+        if (sec === 5400) return "90:00";
+        return "90:00 +" + (Math.floor((sec-5400)/60)+1);
     }
-
-    return "00:00";
 }
 
 function updateTimer() {
     if (!startTime) return;
-
-    let now = Date.now();
-    let totalSeconds = Math.floor((now - startTime + elapsed) / 1000);
-
+    let totalSeconds = Math.floor((Date.now() - startTime + elapsed) / 1000);
     document.getElementById('timer').innerText = formatTime(totalSeconds);
 }
 
@@ -248,8 +229,7 @@ function startTimer() {
 
 function stopTimer() {
     if (timerInterval) {
-        let now = Date.now();
-        elapsed += (now - startTime);
+        elapsed += (Date.now() - startTime);
         clearInterval(timerInterval);
         timerInterval = null;
         startTime = null;
@@ -259,7 +239,6 @@ function stopTimer() {
 function resetMatch() {
     stopTimer();
     elapsed = 0;
-    startTime = null;
     homeScore = 0;
     awayScore = 0;
     currentHalf = 1;
@@ -273,8 +252,7 @@ function resetMatch() {
 
 function startSecondHalf() {
     stopTimer();
-    elapsed = 45 * 60 * 1000;
-    startTime = null;
+    elapsed = 2700000;
     currentHalf = 2;
 
     document.getElementById('timer').innerText = "45:00";
