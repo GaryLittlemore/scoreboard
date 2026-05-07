@@ -101,6 +101,11 @@ button:active { background: #0f5ec7; }
     margin: 5px 0;
 }
 
+/* ✅ HIDE CONTROLS */
+.hidden {
+    display: none !important;
+}
+
 @media(min-width: 600px) {
     .teams { flex-direction: row; }
     .team { width: 48%; }
@@ -130,7 +135,7 @@ button:active { background: #0f5ec7; }
     </div>
 </div>
 
-<div class="buttons">
+<div class="buttons" id="buttonPanel">
     <button onclick="addGoal('home')">Home Goal</button>
     <button onclick="addGoal('away')">Away Goal</button>
     <button onclick="removeGoal('home')">Home -1</button>
@@ -148,28 +153,35 @@ button:active { background: #0f5ec7; }
 
 <div class="timer" id="timer">00:00</div>
 
-<div class="controls">
+<!-- ✅ TOGGLE BUTTON -->
+<div style="margin-bottom:10px;">
+    <button onclick="toggleControls()" id="toggleBtn">
+        Hide Controls
+    </button>
+</div>
+
+<div class="controls" id="controlsPanel">
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
     <button onclick="resetMatch()">Reset</button>
     <button onclick="startSecondHalf()">2nd Half</button>
 </div>
 
-<div style="margin-top: 10px;">
+<div id="eventPanel" style="margin-top: 10px;">
     <input id="customEvent" placeholder="Enter match event..." style="width: 65%;">
     <button onclick="addCustomEvent()" style="width: 30%;">Add</button>
 </div>
 
-<div style="margin:10px 0;">
+<div style="margin:10px 0;" id="detailsPanel">
     <input id="competition" placeholder="Competition" style="width:45%;">
     <input id="venue" placeholder="Venue" style="width:45%;">
 </div>
 
-<div style="margin-top:10px;">
+<div style="margin-top:10px;" id="pdfPanel">
     <button onclick="exportPDF()">Export PDF</button>
 </div>
 
-<div class="log">
+<div class="log" id="logPanel">
     <h3>Match Events Log</h3>
     <div id="log"></div>
 </div>
@@ -179,6 +191,9 @@ button:active { background: #0f5ec7; }
 <script>
 let homeScore = 0, awayScore = 0;
 let startTime = null, elapsed = 0, timerInterval = null, currentHalf = 1;
+
+/* ✅ TOGGLE STATE */
+let controlsHidden = false;
 
 /* ELEMENT REFERENCES */
 const homeScoreEl = document.getElementById('homeScore');
@@ -190,13 +205,31 @@ const awayNameEl = document.getElementById('awayName');
 const halfDisplayEl = document.getElementById('halfDisplay');
 const customEventEl = document.getElementById('customEvent');
 
+/* ✅ TOGGLE FUNCTION */
+function toggleControls(){
+
+    controlsHidden = !controlsHidden;
+
+    document.getElementById('buttonPanel').classList.toggle('hidden');
+    document.getElementById('controlsPanel').classList.toggle('hidden');
+    document.getElementById('eventPanel').classList.toggle('hidden');
+    document.getElementById('detailsPanel').classList.toggle('hidden');
+    document.getElementById('pdfPanel').classList.toggle('hidden');
+    document.getElementById('logPanel').classList.toggle('hidden');
+
+    document.getElementById('toggleBtn').innerText =
+        controlsHidden ? "Show Controls" : "Hide Controls";
+}
+
 function formatTime(sec){
     let m=Math.floor(sec/60), s=sec%60;
+
     if(currentHalf===1){
         if(m<45) return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
         if(sec===2700) return "45:00";
         return "45:00 +"+(Math.floor((sec-2700)/60)+1);
     }
+
     if(currentHalf===2){
         if(m<90) return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
         if(sec===5400) return "90:00";
@@ -206,6 +239,7 @@ function formatTime(sec){
 
 function updateTimer(){
     if(!startTime) return;
+
     let sec=Math.floor((Date.now()-startTime+elapsed)/1000);
     timerEl.innerText=formatTime(sec);
 }
@@ -228,7 +262,12 @@ function stopTimer(){
 
 function resetMatch(){
     stopTimer();
-    elapsed=0;homeScore=0;awayScore=0;currentHalf=1;
+
+    elapsed=0;
+    homeScore=0;
+    awayScore=0;
+    currentHalf=1;
+
     timerEl.innerText="00:00";
     homeScoreEl.innerText=0;
     awayScoreEl.innerText=0;
@@ -238,14 +277,18 @@ function resetMatch(){
 
 function startSecondHalf(){
     stopTimer();
+
     elapsed=2700000;
     currentHalf=2;
+
     timerEl.innerText="45:00";
     halfDisplayEl.innerText="2nd Half";
 }
 
 function getCurrentTime(){
-    return Math.floor((elapsed+(startTime?Date.now()-startTime:0))/1000);
+    return Math.floor(
+        (elapsed+(startTime?Date.now()-startTime:0))/1000
+    );
 }
 
 function addLog(t){
@@ -256,25 +299,50 @@ function addLog(t){
 }
 
 function addGoal(t){
+
     let time=formatTime(getCurrentTime());
-    let name=t==='home'?homeNameEl.value:awayNameEl.value;
-    if(t==='home'){homeScore++;homeScoreEl.innerText=homeScore;}
-    else{awayScore++;awayScoreEl.innerText=awayScore;}
+
+    let name=t==='home'
+        ? homeNameEl.value
+        : awayNameEl.value;
+
+    if(t==='home'){
+        homeScore++;
+        homeScoreEl.innerText=homeScore;
+    } else {
+        awayScore++;
+        awayScoreEl.innerText=awayScore;
+    }
+
     addLog(`${name} scored (${time})`);
 }
 
 function removeGoal(t){
-    if(t==='home'&&homeScore>0){homeScore--;homeScoreEl.innerText=homeScore;}
-    if(t==='away'&&awayScore>0){awayScore--;awayScoreEl.innerText=awayScore;}
+
+    if(t==='home'&&homeScore>0){
+        homeScore--;
+        homeScoreEl.innerText=homeScore;
+    }
+
+    if(t==='away'&&awayScore>0){
+        awayScore--;
+        awayScoreEl.innerText=awayScore;
+    }
 }
 
 function addEvent(t,i){
+
     let time=formatTime(getCurrentTime());
-    let name=t==='home'?homeNameEl.value:awayNameEl.value;
+
+    let name=t==='home'
+        ? homeNameEl.value
+        : awayNameEl.value;
+
     addLog(`${name} ${i} (${time})`);
 }
 
 function addCustomEvent(){
+
     if(customEventEl.value.trim()){
         addLog(customEventEl.value);
         customEventEl.value="";
@@ -282,10 +350,13 @@ function addCustomEvent(){
 }
 
 function exportPDF(){
+
     const { jsPDF } = window.jspdf;
     const doc=new jsPDF();
 
-    let home=homeNameEl.value, away=awayNameEl.value;
+    let home=homeNameEl.value;
+    let away=awayNameEl.value;
+
     let comp=document.getElementById('competition').value||"-";
     let venue=document.getElementById('venue').value||"-";
 
@@ -308,21 +379,27 @@ function exportPDF(){
     doc.text("Match Events Log",20,85);
 
     let y=95;
+
     document.querySelectorAll(".log-entry").forEach(e=>{
+
         let lines=doc.splitTextToSize(e.innerText,170);
-        if(y>270){doc.addPage();y=20;}
+
+        if(y>270){
+            doc.addPage();
+            y=20;
+        }
+
         doc.text(lines,20,y);
         y+=lines.length*6+2;
     });
 
-    /* ✅ FOOTER WITH PAGE NUMBERS */
     let pageCount = doc.getNumberOfPages();
 
     for (let i = 1; i <= pageCount; i++) {
+
         doc.setPage(i);
         doc.setFontSize(9);
 
-        // Center copyright
         doc.text(
             "© Gary Littlemore",
             w / 2,
@@ -330,7 +407,6 @@ function exportPDF(){
             { align: "center" }
         );
 
-        // Right aligned page numbers
         doc.text(
             `Page ${i} of ${pageCount}`,
             w - 20,
