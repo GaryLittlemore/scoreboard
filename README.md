@@ -1,2 +1,2 @@
 # scoreboard
-Web based football scoreboard system.
+Web based football match logging system.
