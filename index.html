@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Football Scoreboard</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
+/* -------------------- GLOBAL -------------------- */
 body {
     font-family: Arial, sans-serif;
     background: #0b1f3a;
@@ -25,6 +25,17 @@ body {
 
 h1 { font-size: 24px; }
 
+/* -------------------- INPUTS -------------------- */
+input {
+    font-size: 18px;
+    padding: 8px;
+    width: 100%;
+    border-radius: 6px;
+    border: none;
+    text-align: center;
+}
+
+/* -------------------- TEAMS -------------------- */
 .teams {
     display: flex;
     flex-direction: column;
@@ -37,25 +48,13 @@ h1 { font-size: 24px; }
     align-items: center;
 }
 
-input {
-    font-size: 18px;
-    padding: 5px;
-    width: 45%;
+.score {
+    font-size: 36px;
+    width: 60px;
     text-align: center;
 }
 
-.score {
-    font-size: 36px;
-    width: 50px;
-}
-
-.buttons {
-    margin: 15px 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
+/* -------------------- BUTTONS -------------------- */
 button {
     font-size: 18px;
     padding: 12px;
@@ -64,10 +63,27 @@ button {
     border-radius: 8px;
     background: #1e90ff;
     color: white;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-button:active { background: #0f5ec7; }
+button:hover {
+    background: #3aa0ff;
+}
 
+button:active {
+    background: #0f5ec7;
+}
+
+.buttons,
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* -------------------- TIMER -------------------- */
 .timer {
     font-size: 48px;
     margin: 10px 0;
@@ -78,13 +94,12 @@ button:active { background: #0f5ec7; }
     margin-bottom: 10px;
 }
 
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+/* -------------------- PANELS -------------------- */
+.panel-row {
+    display: flex;
     gap: 10px;
+    margin: 10px 0;
 }
-
-.controls button { width: 100%; }
 
 .log {
     margin-top: 20px;
@@ -101,28 +116,26 @@ button:active { background: #0f5ec7; }
     margin: 5px 0;
 }
 
-/* ✅ HIDE CONTROLS */
 .hidden {
     display: none !important;
 }
 
-@media(min-width: 600px) {
+/* -------------------- RESPONSIVE -------------------- */
+@media (min-width: 600px) {
     .teams { flex-direction: row; }
     .team { width: 48%; }
-    button { width: auto; }
-    .controls button { width: auto; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h1>⚽ Scoreboard</h1>
 
 <div class="half" id="halfDisplay">1st Half</div>
 
+<!-- TEAMS -->
 <div class="teams">
     <div class="team">
         <input id="homeName" value="Home">
@@ -135,31 +148,33 @@ button:active { background: #0f5ec7; }
     </div>
 </div>
 
+<!-- GOAL / CARD / SUB BUTTONS -->
 <div class="buttons" id="buttonPanel">
     <button onclick="addGoal('home')">Home Goal</button>
     <button onclick="addGoal('away')">Away Goal</button>
     <button onclick="removeGoal('home')">Home -1</button>
     <button onclick="removeGoal('away')">Away -1</button>
-
     <button onclick="addEvent('home','YC')">YC</button>
     <button onclick="addEvent('away','YC')">YC</button>
-
     <button onclick="addEvent('home','RC')">RC</button>
     <button onclick="addEvent('away','RC')">RC</button>
-
     <button onclick="addEvent('home','Sub')">Sub</button>
     <button onclick="addEvent('away','Sub')">Sub</button>
 </div>
 
-<div class="timer" id="timer">00:00</div>
-
-<!-- ✅ TOGGLE BUTTON -->
-<div style="margin-bottom:10px;">
-    <button onclick="toggleControls()" id="toggleBtn">
-        Hide Controls
-    </button>
+<!-- CUSTOM EVENT -->
+<div class="panel-row" id="eventPanel">
+    <input id="customEvent" placeholder="Enter match event...">
+    <button onclick="addCustomEvent()">Add</button>
 </div>
 
+<!-- TIMER -->
+<div class="timer" id="timer">00:00</div>
+
+<!-- TOGGLE -->
+<button onclick="toggleControls()" id="toggleBtn">Hide Controls</button>
+
+<!-- CONTROLS -->
 <div class="controls" id="controlsPanel">
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
@@ -167,20 +182,18 @@ button:active { background: #0f5ec7; }
     <button onclick="startSecondHalf()">2nd Half</button>
 </div>
 
-<div id="eventPanel" style="margin-top: 10px;">
-    <input id="customEvent" placeholder="Enter match event..." style="width: 65%;">
-    <button onclick="addCustomEvent()" style="width: 30%;">Add</button>
+<!-- DETAILS -->
+<div class="panel-row" id="detailsPanel">
+    <input id="competition" placeholder="Competition">
+    <input id="venue" placeholder="Venue">
 </div>
 
-<div style="margin:10px 0;" id="detailsPanel">
-    <input id="competition" placeholder="Competition" style="width:45%;">
-    <input id="venue" placeholder="Venue" style="width:45%;">
-</div>
-
-<div style="margin-top:10px;" id="pdfPanel">
+<!-- PDF EXPORT -->
+<div id="pdfPanel">
     <button onclick="exportPDF()">Export PDF</button>
 </div>
 
+<!-- LOG -->
 <div class="log" id="logPanel">
     <h3>Match Events Log</h3>
     <div id="log"></div>
@@ -189,13 +202,11 @@ button:active { background: #0f5ec7; }
 </div>
 
 <script>
+/* JS unchanged except formatting */
 let homeScore = 0, awayScore = 0;
 let startTime = null, elapsed = 0, timerInterval = null, currentHalf = 1;
-
-/* ✅ TOGGLE STATE */
 let controlsHidden = false;
 
-/* ELEMENT REFERENCES */
 const homeScoreEl = document.getElementById('homeScore');
 const awayScoreEl = document.getElementById('awayScore');
 const timerEl = document.getElementById('timer');
@@ -205,214 +216,174 @@ const awayNameEl = document.getElementById('awayName');
 const halfDisplayEl = document.getElementById('halfDisplay');
 const customEventEl = document.getElementById('customEvent');
 
-/* ✅ TOGGLE FUNCTION */
-function toggleControls(){
-
+function toggleControls() {
     controlsHidden = !controlsHidden;
 
-    document.getElementById('buttonPanel').classList.toggle('hidden');
-    document.getElementById('controlsPanel').classList.toggle('hidden');
-    document.getElementById('eventPanel').classList.toggle('hidden');
-    document.getElementById('detailsPanel').classList.toggle('hidden');
-    document.getElementById('pdfPanel').classList.toggle('hidden');
-    document.getElementById('logPanel').classList.toggle('hidden');
+    ['buttonPanel','controlsPanel','eventPanel','detailsPanel','pdfPanel','logPanel']
+        .forEach(id => document.getElementById(id).classList.toggle('hidden'));
 
     document.getElementById('toggleBtn').innerText =
         controlsHidden ? "Show Controls" : "Hide Controls";
 }
 
-function formatTime(sec){
-    let m=Math.floor(sec/60), s=sec%60;
+function formatTime(sec) {
+    let m = Math.floor(sec / 60), s = sec % 60;
 
-    if(currentHalf===1){
-        if(m<45) return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
-        if(sec===2700) return "45:00";
-        return "45:00 +"+(Math.floor((sec-2700)/60)+1);
+    if (currentHalf === 1) {
+        if (m < 45) return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (sec === 2700) return "45:00";
+        return "45:00 +" + (Math.floor((sec - 2700) / 60) + 1);
     }
 
-    if(currentHalf===2){
-        if(m<90) return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
-        if(sec===5400) return "90:00";
-        return "90:00 +"+(Math.floor((sec-5400)/60)+1);
-    }
-}
-
-function updateTimer(){
-    if(!startTime) return;
-
-    let sec=Math.floor((Date.now()-startTime+elapsed)/1000);
-    timerEl.innerText=formatTime(sec);
-}
-
-function startTimer(){
-    if(!timerInterval){
-        startTime=Date.now();
-        timerInterval=setInterval(updateTimer,1000);
+    if (currentHalf === 2) {
+        if (m < 90) return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (sec === 5400) return "90:00";
+        return "90:00 +" + (Math.floor((sec - 5400) / 60) + 1);
     }
 }
 
-function stopTimer(){
-    if(timerInterval){
-        elapsed+=Date.now()-startTime;
+function updateTimer() {
+    if (!startTime) return;
+    let sec = Math.floor((Date.now() - startTime + elapsed) / 1000);
+    timerEl.innerText = formatTime(sec);
+}
+
+function startTimer() {
+    if (!timerInterval) {
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        elapsed += Date.now() - startTime;
         clearInterval(timerInterval);
-        timerInterval=null;
-        startTime=null;
+        timerInterval = null;
+        startTime = null;
     }
 }
 
-function resetMatch(){
+function resetMatch() {
     stopTimer();
+    elapsed = 0;
+    homeScore = 0;
+    awayScore = 0;
+    currentHalf = 1;
 
-    elapsed=0;
-    homeScore=0;
-    awayScore=0;
-    currentHalf=1;
-
-    timerEl.innerText="00:00";
-    homeScoreEl.innerText=0;
-    awayScoreEl.innerText=0;
-    halfDisplayEl.innerText="1st Half";
-    logEl.innerHTML="";
+    timerEl.innerText = "00:00";
+    homeScoreEl.innerText = 0;
+    awayScoreEl.innerText = 0;
+    halfDisplayEl.innerText = "1st Half";
+    logEl.innerHTML = "";
 }
 
-function startSecondHalf(){
+function startSecondHalf() {
     stopTimer();
-
-    elapsed=2700000;
-    currentHalf=2;
-
-    timerEl.innerText="45:00";
-    halfDisplayEl.innerText="2nd Half";
+    elapsed = 2700000;
+    currentHalf = 2;
+    timerEl.innerText = "45:00";
+    halfDisplayEl.innerText = "2nd Half";
 }
 
-function getCurrentTime(){
-    return Math.floor(
-        (elapsed+(startTime?Date.now()-startTime:0))/1000
-    );
+function getCurrentTime() {
+    return Math.floor((elapsed + (startTime ? Date.now() - startTime : 0)) / 1000);
 }
 
-function addLog(t){
-    let d=document.createElement("div");
-    d.className="log-entry";
-    d.innerText=t;
-    logEl.appendChild(d);
+function addLog(text) {
+    let entry = document.createElement("div");
+    entry.className = "log-entry";
+    entry.innerText = text;
+    logEl.appendChild(entry);
 }
 
-function addGoal(t){
+function addGoal(team) {
+    let time = formatTime(getCurrentTime());
+    let name = team === 'home' ? homeNameEl.value : awayNameEl.value;
 
-    let time=formatTime(getCurrentTime());
-
-    let name=t==='home'
-        ? homeNameEl.value
-        : awayNameEl.value;
-
-    if(t==='home'){
+    if (team === 'home') {
         homeScore++;
-        homeScoreEl.innerText=homeScore;
+        homeScoreEl.innerText = homeScore;
     } else {
         awayScore++;
-        awayScoreEl.innerText=awayScore;
+        awayScoreEl.innerText = awayScore;
     }
 
     addLog(`${name} scored (${time})`);
 }
 
-function removeGoal(t){
-
-    if(t==='home'&&homeScore>0){
+function removeGoal(team) {
+    if (team === 'home' && homeScore > 0) {
         homeScore--;
-        homeScoreEl.innerText=homeScore;
+        homeScoreEl.innerText = homeScore;
     }
-
-    if(t==='away'&&awayScore>0){
+    if (team === 'away' && awayScore > 0) {
         awayScore--;
-        awayScoreEl.innerText=awayScore;
+        awayScoreEl.innerText = awayScore;
     }
 }
 
-function addEvent(t,i){
-
-    let time=formatTime(getCurrentTime());
-
-    let name=t==='home'
-        ? homeNameEl.value
-        : awayNameEl.value;
-
-    addLog(`${name} ${i} (${time})`);
+function addEvent(team, type) {
+    let time = formatTime(getCurrentTime());
+    let name = team === 'home' ? homeNameEl.value : awayNameEl.value;
+    addLog(`${name} ${type} (${time})`);
 }
 
-function addCustomEvent(){
-
-    if(customEventEl.value.trim()){
+function addCustomEvent() {
+    if (customEventEl.value.trim()) {
         addLog(customEventEl.value);
-        customEventEl.value="";
+        customEventEl.value = "";
     }
 }
 
-function exportPDF(){
-
+function exportPDF() {
     const { jsPDF } = window.jspdf;
-    const doc=new jsPDF();
+    const doc = new jsPDF();
 
-    let home=homeNameEl.value;
-    let away=awayNameEl.value;
-
-    let comp=document.getElementById('competition').value||"-";
-    let venue=document.getElementById('venue').value||"-";
-
-    let w=doc.internal.pageSize.getWidth();
+    let home = homeNameEl.value;
+    let away = awayNameEl.value;
+    let comp = document.getElementById('competition').value || "-";
+    let venue = document.getElementById('venue').value || "-";
+    let w = doc.internal.pageSize.getWidth();
 
     doc.setFontSize(20);
-    doc.text("MATCH REPORT",w/2,20,{align:"center"});
-    doc.line(20,25,w-20,25);
+    doc.text("MATCH REPORT", w / 2, 20, { align: "center" });
+    doc.line(20, 25, w - 20, 25);
 
     doc.setFontSize(12);
-    doc.text("Date: "+new Date().toLocaleDateString(),20,35);
-    doc.text("Competition: "+comp,20,42);
-    doc.text("Venue: "+venue,20,49);
+    doc.text("Date: " + new Date().toLocaleDateString(), 20, 35);
+    doc.text("Competition: " + comp, 20, 42);
+    doc.text("Venue: " + venue, 20, 49);
 
     doc.setFontSize(16);
-    doc.text(`${home} ${homeScore} - ${awayScore} ${away}`,w/2,65,{align:"center"});
-    doc.line(20,72,w-20,72);
+    doc.text(`${home} ${homeScore} - ${awayScore} ${away}`, w / 2, 65, { align: "center" });
+    doc.line(20, 72, w - 20, 72);
 
     doc.setFontSize(14);
-    doc.text("Match Events Log",20,85);
+    doc.text("Match Events Log", 20, 85);
 
-    let y=95;
+    let y = 95;
 
-    document.querySelectorAll(".log-entry").forEach(e=>{
+    document.querySelectorAll(".log-entry").forEach(e => {
+        let lines = doc.splitTextToSize(e.innerText, 170);
 
-        let lines=doc.splitTextToSize(e.innerText,170);
-
-        if(y>270){
+        if (y > 270) {
             doc.addPage();
-            y=20;
+            y = 20;
         }
 
-        doc.text(lines,20,y);
-        y+=lines.length*6+2;
+        doc.text(lines, 20, y);
+        y += lines.length * 6 + 2;
     });
 
     let pageCount = doc.getNumberOfPages();
 
     for (let i = 1; i <= pageCount; i++) {
-
         doc.setPage(i);
         doc.setFontSize(9);
 
-        doc.text(
-            "© Gary Littlemore",
-            w / 2,
-            290,
-            { align: "center" }
-        );
-
-        doc.text(
-            `Page ${i} of ${pageCount}`,
-            w - 20,
-            290,
-            { align: "right" }
-        );
+        doc.text("© Gary Littlemore", w / 2, 290, { align: "center" });
+        doc.text(`Page ${i} of ${pageCount}`, w - 20, 290, { align: "right" });
     }
 
     doc.save(`${home} Vs ${away}.pdf`);
