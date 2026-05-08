@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Football Scoreboard</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* -------------------- GLOBAL -------------------- */
 body {
     font-family: Arial, sans-serif;
     background: #0b1f3a;
@@ -23,6 +23,17 @@ body {
 
 h1 { font-size: 24px; }
 
+/* -------------------- INPUTS -------------------- */
+input {
+    font-size: 18px;
+    padding: 8px;
+    width: 100%;
+    border-radius: 6px;
+    border: none;
+    text-align: center;
+}
+
+/* -------------------- TEAMS -------------------- */
 .teams {
     display: flex;
     flex-direction: column;
@@ -35,25 +46,13 @@ h1 { font-size: 24px; }
     align-items: center;
 }
 
-input {
-    font-size: 18px;
-    padding: 5px;
-    width: 45%;
+.score {
+    font-size: 36px;
+    width: 60px;
     text-align: center;
 }
 
-.score {
-    font-size: 36px;
-    width: 50px;
-}
-
-.buttons {
-    margin: 15px 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
+/* -------------------- BUTTONS -------------------- */
 button {
     font-size: 18px;
     padding: 12px;
@@ -62,10 +61,27 @@ button {
     border-radius: 8px;
     background: #1e90ff;
     color: white;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-button:active { background: #0f5ec7; }
+button:hover {
+    background: #3aa0ff;
+}
 
+button:active {
+    background: #0f5ec7;
+}
+
+.buttons,
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* -------------------- TIMER -------------------- */
 .timer {
     font-size: 48px;
     margin: 10px 0;
@@ -76,13 +92,12 @@ button:active { background: #0f5ec7; }
     margin-bottom: 10px;
 }
 
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+/* -------------------- PANELS -------------------- */
+.panel-row {
+    display: flex;
     gap: 10px;
+    margin: 10px 0;
 }
-
-.controls button { width: 100%; }
 
 .log {
     margin-top: 20px;
@@ -103,23 +118,22 @@ button:active { background: #0f5ec7; }
     display: none !important;
 }
 
-@media(min-width: 600px) {
+/* -------------------- RESPONSIVE -------------------- */
+@media (min-width: 600px) {
     .teams { flex-direction: row; }
     .team { width: 48%; }
-    button { width: auto; }
-    .controls button { width: auto; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h1>⚽ Scoreboard</h1>
 
 <div class="half" id="halfDisplay">1st Half</div>
 
+<!-- TEAMS -->
 <div class="teams">
     <div class="team">
         <input id="homeName" value="Home">
@@ -132,6 +146,7 @@ button:active { background: #0f5ec7; }
     </div>
 </div>
 
+<!-- GOAL / CARD / SUB BUTTONS -->
 <div class="buttons" id="buttonPanel">
     <button onclick="addGoal('home')">Home Goal</button>
     <button onclick="addGoal('away')">Away Goal</button>
@@ -148,13 +163,19 @@ button:active { background: #0f5ec7; }
     <button onclick="addEvent('away','🔁')">🔁</button>
 </div>
 
-<div class="timer" id="timer">00:00</div>
-
-<!-- ✅ MOVED TO HERE -->
-<div style="margin-bottom:10px;">
-    <button onclick="toggleControls()" id="toggleBtn">Hide Controls</button>
+<!-- CUSTOM EVENT -->
+<div class="panel-row" id="eventPanel">
+    <input id="customEvent" placeholder="Enter match event...">
+    <button onclick="addCustomEvent()">Add</button>
 </div>
 
+<!-- TIMER -->
+<div class="timer" id="timer">00:00</div>
+
+<!-- TOGGLE -->
+<button id="toggleBtn" onclick="toggleControls()">Hide Controls</button>
+
+<!-- CONTROLS -->
 <div class="controls" id="controlsPanel">
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
@@ -162,11 +183,7 @@ button:active { background: #0f5ec7; }
     <button onclick="startSecondHalf()">2nd Half</button>
 </div>
 
-<div id="eventPanel" style="margin-top: 10px;">
-    <input id="customEvent" placeholder="Enter match event..." style="width: 65%;">
-    <button onclick="addCustomEvent()" style="width: 30%;">Add</button>
-</div>
-
+<!-- LOG -->
 <div class="log" id="logPanel">
     <h3>Match Events Log</h3>
     <div id="log"></div>
@@ -188,36 +205,34 @@ let controlsHidden = false;
 function toggleControls() {
     controlsHidden = !controlsHidden;
 
-    document.getElementById('buttonPanel').classList.toggle('hidden');
-    document.getElementById('controlsPanel').classList.toggle('hidden');
-    document.getElementById('eventPanel').classList.toggle('hidden');
-    document.getElementById('logPanel').classList.toggle('hidden');
+    ['buttonPanel','controlsPanel','eventPanel','logPanel']
+        .forEach(id => document.getElementById(id).classList.toggle('hidden'));
 
     document.getElementById('toggleBtn').innerText =
         controlsHidden ? "Show Controls" : "Hide Controls";
 }
 
 function formatTime(sec) {
-    let minutes = Math.floor(sec / 60);
-    let secs = sec % 60;
+    let m = Math.floor(sec / 60);
+    let s = sec % 60;
 
     if (currentHalf === 1) {
-        if (minutes < 45) return String(minutes).padStart(2,'0') + ":" + String(secs).padStart(2,'0');
+        if (m < 45) return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         if (sec === 2700) return "45:00";
-        return "45:00 +" + (Math.floor((sec-2700)/60)+1);
+        return "45:00 +" + (Math.floor((sec - 2700) / 60) + 1);
     }
 
     if (currentHalf === 2) {
-        if (minutes < 90) return String(minutes).padStart(2,'0') + ":" + String(secs).padStart(2,'0');
+        if (m < 90) return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         if (sec === 5400) return "90:00";
-        return "90:00 +" + (Math.floor((sec-5400)/60)+1);
+        return "90:00 +" + (Math.floor((sec - 5400) / 60) + 1);
     }
 }
 
 function updateTimer() {
     if (!startTime) return;
-    let totalSeconds = Math.floor((Date.now() - startTime + elapsed) / 1000);
-    document.getElementById('timer').innerText = formatTime(totalSeconds);
+    let sec = Math.floor((Date.now() - startTime + elapsed) / 1000);
+    document.getElementById('timer').innerText = formatTime(sec);
 }
 
 function startTimer() {
