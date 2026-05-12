@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Multi Page Viewer</title>
+<title>External Website Viewer</title>
 
 <style>
     * {
@@ -27,11 +27,12 @@
         border-bottom: 2px solid #333;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
 
     label {
         font-size: 18px;
+        white-space: nowrap;
     }
 
     select {
@@ -42,12 +43,12 @@
         background: #2e2e2e;
         color: white;
         cursor: pointer;
+        min-width: 220px;
     }
 
     .viewer {
         flex: 1;
         width: 100%;
-        height: 100%;
     }
 
     iframe {
@@ -56,23 +57,35 @@
         border: none;
         background: white;
     }
+
+    .warning {
+        padding: 10px 15px;
+        background: #222;
+        border-top: 1px solid #333;
+        font-size: 14px;
+        color: #aaa;
+    }
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-    <label for="pageSelect">Select Page:</label>
+    <label for="pageSelect">Select Website:</label>
 
     <select id="pageSelect">
-        <option value="index_lite.html">Lite</option>
-        <option value="index.html/">Main</option>
-        <option value="index_tablet.html">Tablet</option>
+        <option value="https://example.com">Example</option>
+        <option value="https://www.wikipedia.org">Wikipedia</option>
+        <option value="https://www.bbc.com">BBC</option>
     </select>
 </div>
 
 <div class="viewer">
-    <iframe id="pageFrame" src="index.html"></iframe>
+    <iframe id="pageFrame" src="https://example.com"></iframe>
+</div>
+
+<div class="warning">
+    Some websites block being displayed in iframes for security reasons.
 </div>
 
 <script>
